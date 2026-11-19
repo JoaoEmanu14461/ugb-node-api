@@ -4,5 +4,8 @@ const router = express.Router();
 const heroesController = require("../controllers/heroes.controller");
 
 router.get("/", heroesController.list);
+router.get("/:id", heroesController.getId);
 router.post("/", heroesController.create);
+router.put("/:id", heroesController.update);
+router.delete("/:id", heroesController.remove)
 module.exports = router;

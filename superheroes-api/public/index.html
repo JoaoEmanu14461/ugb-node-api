@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arquivo de Heróis • UGB</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style>
+    :root {
+      --cor-destaque: #e11d48;
+      --cor-destaque-hover: #be123c;
+      --cor-fundo: #0f172a;
+    }
+  </style>
+</head>
+<body class="bg-(--cor-fundo) text-slate-100 min-h-screen font-sans">
+
+  
+  <header class="bg-slate-950 border-b border-slate-800">
+    <div class="max-w-5xl mx-auto px-4 py-5 flex items-center gap-4">
+      <img
+        src="logoincriveis.png"
+        alt="Emblema National Supers Agency"
+        class="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover"
+      />
+
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-rose-500">
+          Base de Dados Secreta
+        </span>
+        <h1 class="text-2xl md:text-3xl font-bold text-white">
+          Arquivo de Heróis
+        </h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-4 md:p-6 space-y-10">
+
+    
+    <section class="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-md">
+      <h2 id="titulo-form" class="text-lg font-bold text-white mb-4">
+        Registrar Novo Herói
+      </h2>
+
+      <input type="hidden" id="hero-id" />
+
+      <form id="form-hero" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label for="name" class="block text-xs uppercase tracking-wider text-slate-400 mb-1">
+            Codinome (name)
+          </label>
+          <input
+            type="text"
+            id="name"
+            required
+            placeholder="Ex: Homem-Aranha"
+            class="w-full bg-slate-950 text-white p-3 rounded-lg border border-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-500/40"
+          />
+        </div>
+
+        <div>
+          <label for="universe" class="block text-xs uppercase tracking-wider text-slate-400 mb-1">
+            Universo (universe)
+          </label>
+          <input
+            type="text"
+            id="universe"
+            required
+            placeholder="Ex: Marvel"
+            class="w-full bg-slate-950 text-white p-3 rounded-lg border border-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-500/40"
+          />
+        </div>
+
+        <div>
+          <label for="power" class="block text-xs uppercase tracking-wider text-slate-400 mb-1">
+            Habilidade (power)
+          </label>
+          <input
+            type="text"
+            id="power"
+            required
+            placeholder="Ex: Sentido Aranha"
+            class="w-full bg-slate-950 text-white p-3 rounded-lg border border-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-500/40"
+          />
+        </div>
+
+       
+        <div class="md:col-span-2">
+          <label for="movie-title" class="block text-xs uppercase tracking-wider text-slate-400 mb-1">
+            Filme (opcional)
+          </label>
+          <input
+            type="text"
+            id="movie-title"
+            placeholder="Ex: Vingadores: Ultimato"
+            class="w-full bg-slate-950 text-white p-3 rounded-lg border border-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-500/40"
+          />
+        </div>
+
+        <div>
+          <label for="movie-year" class="block text-xs uppercase tracking-wider text-slate-400 mb-1">
+            Ano do Filme
+          </label>
+          <input
+            type="number"
+            id="movie-year"
+            placeholder="Ex: 2019"
+            class="w-full bg-slate-950 text-white p-3 rounded-lg border border-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-500/40"
+          />
+        </div>
+
+        <div class="md:col-span-3 flex justify-end gap-3 mt-2">
+          <button
+            type="button"
+            id="btn-cancelar"
+            onclick="cancelarEdicao()"
+            class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-5 py-3 rounded-lg cursor-pointer"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            id="btn-salvar"
+            class="w-full md:w-auto bg-(--cor-destaque) hover:bg-(--cor-destaque-hover) active:bg-rose-900 text-white font-semibold px-6 py-3 rounded-lg transition-colors cursor-pointer"
+          >
+            Cadastrar Herói
+          </button>
+        </div>
+      </form>
+    </section>
+
+    
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-white">
+          Heróis Registrados
+        </h2>
+        <span id="contador" class="text-xs text-slate-400">
+          0 registros
+        </span>
+      </div>
+
+      <div id="lista-herois" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+       
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const API_URL = "http://localhost:3000/heroes";
+
+   
+    async function listarHerois() {
+      const resposta = await fetch(API_URL);
+      const herois = await resposta.json();
+
+      const lista = document.getElementById("lista-herois");
+      const contador = document.getElementById("contador");
+
+      lista.innerHTML = "";
+      contador.textContent = `${herois.length} registro(s)`;
+
+      if (herois.length === 0) {
+        lista.innerHTML = `<p class="text-slate-400 col-span-full">Nenhum herói cadastrado ainda.</p>`;
+        return;
+      }
+
+      herois.forEach((heroi) => {
+        const isDC = heroi.universe.toLowerCase().includes("dc");
+
+        let corBorda;
+        let corEtiqueta;
+
+        // identifica se o heroi escolhido foi da dc, que deixa o nome do universo e o card em azul para diferenciar
+        if (isDC) {
+          corBorda = "border-t-blue-500";
+          corEtiqueta = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+        } else {
+          corBorda = "border-t-rose-600";
+          corEtiqueta = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+        }
+
+        
+        let textoFilmes = "Nenhum filme vinculado";
+        if (heroi.Movies && heroi.Movies.length > 0) {
+          const titulos = heroi.Movies.map((filme) => `${filme.title} (${filme.year})`);
+          textoFilmes = titulos.join(", ");
+        }
+
+        lista.innerHTML += `
+          <div class="bg-slate-900 border border-slate-800 border-t-[4px] ${corBorda} p-5 rounded-xl shadow-md flex flex-col justify-between gap-4">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-xs font-mono text-slate-500">FICHA #${heroi.id}</span>
+                <span class="text-[11px] font-bold uppercase ${corEtiqueta} border px-2.5 py-0.5 rounded-md">
+                  ${heroi.universe}
+                </span>
+              </div>
+
+              <h3 class="text-xl font-bold text-white mb-1">${heroi.name}</h3>
+              <p class="text-sm text-slate-400 mb-2">
+                <strong class="text-slate-200">Poder:</strong> ${heroi.power}
+              </p>
+              <p class="text-xs text-slate-400">
+                <strong class="text-slate-200">Filmes:</strong> ${textoFilmes}
+              </p>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              <button
+                onclick="prepararEdicao(${heroi.id})"
+                class="text-xs font-semibold bg-slate-800 hover:bg-amber-600 hover:text-white text-amber-400 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              >
+                Editar
+              </button>
+
+              <button
+                onclick="deletarHeroi(${heroi.id})"
+                class="text-xs font-semibold bg-slate-800 hover:bg-red-600 hover:text-white text-red-400 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    
+    const form = document.getElementById("form-hero");
+
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+
+      const id = document.getElementById("hero-id").value;
+      const dados = {
+        name: document.getElementById("name").value,
+        universe: document.getElementById("universe").value,
+        power: document.getElementById("power").value,
+        movieTitle: document.getElementById("movie-title").value.trim(),
+        movieYear: document.getElementById("movie-year").value.trim()
+      };
+
+      if (id) {
+        await fetch(`${API_URL}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados)
+        });
+      } else {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados)
+        });
+      }
+
+      cancelarEdicao();
+      listarHerois();
+    });
+
+    
+    async function prepararEdicao(id) {
+      const resposta = await fetch(`${API_URL}/${id}`);
+      const heroi = await resposta.json();
+
+      document.getElementById("hero-id").value = heroi.id;
+      document.getElementById("name").value = heroi.name;
+      document.getElementById("universe").value = heroi.universe;
+      document.getElementById("power").value = heroi.power;
+
+      
+      document.getElementById("movie-title").value = "";
+      document.getElementById("movie-year").value = "";
+
+      document.getElementById("titulo-form").textContent = `Editando Ficha #${heroi.id}`;
+      document.getElementById("btn-salvar").textContent = "Salvar Alterações";
+      document.getElementById("btn-cancelar").classList.remove("hidden");
+    }
+
+    
+    async function deletarHeroi(id) {
+      const confirmar = confirm("Deseja realmente excluir este herói?");
+      if (!confirmar) return;
+
+      await fetch(`${API_URL}/${id}`, {
+        method: "DELETE"
+      });
+
+      listarHerois();
+    }
+
+    function cancelarEdicao() {
+      form.reset();
+      document.getElementById("hero-id").value = "";
+      document.getElementById("titulo-form").textContent = "Registrar Novo Herói";
+      document.getElementById("btn-salvar").textContent = "Cadastrar Herói";
+      document.getElementById("btn-cancelar").classList.add("hidden");
+    }
+
+    listarHerois();
+  </script>
+</body>
+</html>
